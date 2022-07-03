@@ -1,0 +1,82 @@
+import "dotenv/config";
+import type { AWS } from "@serverless/typescript";
+
+import { login, callback } from "./resources/functions/login";
+import { sort } from "./resources/functions/sort";
+import { createSchedule, getSchedules } from "./resources/functions/schedules";
+import { scheduleRunner } from "./resources/functions/schedule-runner";
+import cognito from "./resources/cognito";
+import apiGateway from "./resources/api-gateway";
+import dynamodb from "./resources/dynamodb";
+
+const requiredEnvVars = ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "CLIENT_REDIRECT_URI"];
+if (!requiredEnvVars.every((v) => Object.prototype.hasOwnProperty.call(process.env, v))) {
+  console.error("Missing required Environment Variable(s):", requiredEnvVars);
+}
+
+const isOffline = process.env.IS_OFFLINE === "true";
+
+const serverlessConfiguration: AWS = {
+  service: "amplified-tools-api",
+  frameworkVersion: "3",
+  package: {
+    individually: true,
+  },
+  plugins: ["serverless-bundle", "serverless-offline", "serverless-iam-roles-per-function"],
+  custom: {},
+  provider: {
+    name: "aws",
+    runtime: "nodejs14.x",
+    stage: "${opt:stage, 'dev'}",
+    region: "eu-west-2",
+    versionFunctions: false,
+    environment: {
+      // Serverless Variables
+      STAGE: "${self:provider.stage}",
+      // Spotify Variables
+      SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "",
+      SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
+      // API Gateway resources do not output their url e.g. "https://<ApiGatewayRestApi>.execute-api.eu-west-2.amazonaws.com/<stage>"
+      API_REDIRECT_URI: isOffline ? `${process.env.API_REDIRECT_URI}` : {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            { Ref: "ApiGatewayRestApi" },
+            ".execute-api.",
+            "${self:provider.region}",
+            ".",
+            { Ref: "AWS::URLSuffix" },
+            "/${self:provider.stage}/callback",
+          ],
+        ],
+      },
+      CLIENT_REDIRECT_URI: isOffline
+        ? `${process.env.CLIENT_REDIRECT_URI}`
+        : "http://localhost:3001/",
+      PKCE_ENABLED: process.env.PKCE_ENABLED || "false",
+    },
+  },
+  functions: {
+    login,
+    callback,
+    sort,
+    createSchedule,
+    getSchedules,
+    scheduleRunner,
+  },
+  resources: {
+    Resources: {
+      ...cognito.Resources,
+      ...apiGateway.Resources,
+      ...dynamodb.Resources,
+      // TODO: SQS DLQ for EventBridge Rules
+    },
+    Outputs: {
+      ...cognito.Outputs,
+      ...dynamodb.Outputs,
+    },
+  },
+};
+
+module.exports = serverlessConfiguration;

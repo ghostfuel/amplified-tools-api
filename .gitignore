@@ -1,0 +1,17 @@
+# Node
+node_modules
+
+# Serverless
+.serverless
+.webpack
+.build
+
+# Environment
+.env
+.env*
+!.env.example
+config.js
+!example.config.js
+
+# Jest
+coverage
