@@ -1,5 +1,7 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import winston, { Logger, format } from "winston";
+import jwt_decode from "jwt-decode";
+import { AWSCognitoIdTokenPayload } from "@custom/types/aws";
 
 export type LoggerContext = {
   requestId?: string;
@@ -44,14 +46,26 @@ export function createLogger(label?: string, context?: LoggerContext) {
 }
 
 export function addLoggerContext(logger: Logger, event: APIGatewayProxyEvent, label?: string) {
+  let user = event?.requestContext.identity.user;
+
+  if (!event.headers["Authorization"]) {
+    logger.info("No Authorization header", event.requestContext);
+  } else {
+    // Decode token for user id
+    const decodedToken = jwt_decode<AWSCognitoIdTokenPayload>(event.headers["Authorization"]);
+    user = decodedToken.sub;
+  }
+
   logger.defaultMeta = {
     label: label || event.resource,
     context: {
       requestId: event.requestContext?.requestId,
       method: event.httpMethod,
-      user: event.requestContext?.identity?.user,
+      user,
     },
   };
+
+  return logger.defaultMeta;
 }
 
 export default createLogger();

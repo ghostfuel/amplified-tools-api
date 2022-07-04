@@ -9,6 +9,7 @@ import addFormats from "ajv-formats";
 import { SortParameters } from "../sort/handler";
 import { nanoid } from "nanoid";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { lambdaResponse } from "@common/lambda";
 
 const eventBridge = new EventBridgeClient({ region: "eu-west-2" });
 const lambda = new Lambda({ region: "eu-west-2" });
@@ -101,7 +102,8 @@ export function generateCronTabFromTimestamp(
  * @returns An API Gateway Proxy Handler Response Body.
  */
 export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  addLoggerContext(logger, event);
+  const { context } = addLoggerContext(logger, event);
+  const user = context.user;
 
   logger.info("Event received", {
     path: event.path,
@@ -110,22 +112,14 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
     body: event.body,
   });
 
-  // TODO: May need to find a better alternative to user identity
-  const user = event.requestContext.identity.user;
   if (!user) {
     logger.info("No User identified for request");
-    return {
-      statusCode: 400,
-      body: "Missing user identifier",
-    };
+    return lambdaResponse(400, "Missing user identifier");
   }
 
   // Check for a spotify credentials
   if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Missing body parameters",
-    };
+    return lambdaResponse(400, "Missing body parameters");
   }
 
   // Validate request body
@@ -133,10 +127,7 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
   const isValidScheduleBody = validateScheduleParameters(scheduleParameters);
   if (!isValidScheduleBody) {
     logger.info("Invalid body parameters", validateScheduleParameters.errors);
-    return {
-      statusCode: 400,
-      body: "Invalid body parameters",
-    };
+    return lambdaResponse(400, "Invalid body parameters");
   }
 
   // Generate cron expression from cadence/timestamp
@@ -155,10 +146,7 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
 
   if (!rule.RuleArn) {
     logger.error("Failed to create rule", rule);
-    return {
-      statusCode: 500,
-      body: "Failed to create rule",
-    };
+    return lambdaResponse(500, "Failed to create rule");
   }
 
   // Add permission to rule to trigger lambda
@@ -207,8 +195,5 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
   logger.info("Added rule to EventBridge", result);
 
   logger.info("Successfully scheduled dynamic rule");
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result),
-  };
+  return lambdaResponse(200, JSON.stringify(result));
 };

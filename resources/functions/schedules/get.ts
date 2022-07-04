@@ -2,6 +2,7 @@ import logger, { addLoggerContext } from "@common/logger";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoddbClient } from "@common/dynamodb";
+import { lambdaResponse } from "@common/lambda";
 
 /**
  * Lambda to list a users schedules.
@@ -11,7 +12,8 @@ import { dynamoddbClient } from "@common/dynamodb";
  * @returns An API Gateway Proxy Handler Response Body.
  */
 export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  addLoggerContext(logger, event);
+  const { context } = addLoggerContext(logger, event);
+  const user = context.user;
 
   logger.info("Event received", {
     path: event.path,
@@ -19,15 +21,6 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
     queryStringParameters: event.queryStringParameters,
     body: event.body,
   });
-
-  const user = event.requestContext.identity.user;
-  if (!user) {
-    logger.info("No User identified for request");
-    return {
-      statusCode: 400,
-      body: "Missing user identifier",
-    };
-  }
 
   try {
     const query = new QueryCommand({
@@ -41,15 +34,9 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
     const querySchedulesRes = await dynamoddbClient.send(query);
     logger.info(`Retrieved schedules for ${user}`, querySchedulesRes);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(querySchedulesRes.Items),
-    };
+    return lambdaResponse(200, JSON.stringify(querySchedulesRes.Items));
   } catch (error) {
     logger.error(`Failed to retrieve schedules for ${user}`, error);
-    return {
-      statusCode: 500,
-      body: "Failed to retrieve schedules",
-    };
+    return lambdaResponse(500, "Failed to retrieve schedules");
   }
 };
