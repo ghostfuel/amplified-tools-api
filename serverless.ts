@@ -9,7 +9,7 @@ import cognito from "./resources/cognito";
 import apiGateway from "./resources/api-gateway";
 import dynamodb from "./resources/dynamodb";
 
-const requiredEnvVars = ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "CLIENT_REDIRECT_URI"];
+const requiredEnvVars = ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET"];
 if (!requiredEnvVars.every((v) => Object.prototype.hasOwnProperty.call(process.env, v))) {
   console.error("Missing required Environment Variable(s):", requiredEnvVars);
 }
@@ -30,6 +30,9 @@ const serverlessConfiguration: AWS = {
     stage: "${opt:stage, 'dev'}",
     region: "eu-west-2",
     versionFunctions: false,
+    logs: {
+      restApi: true,
+    },
     environment: {
       // Serverless Variables
       STAGE: "${self:provider.stage}",
@@ -37,7 +40,7 @@ const serverlessConfiguration: AWS = {
       SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "",
       SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
       // API Gateway resources do not output their url e.g. "https://<ApiGatewayRestApi>.execute-api.eu-west-2.amazonaws.com/<stage>"
-      API_REDIRECT_URI: isOffline ? `${process.env.API_REDIRECT_URI}` : {
+      API_REDIRECT_URI: isOffline ? "http://localhost:3000/${self:provider.stage}/callback" : {
         "Fn::Join": [
           "",
           [
@@ -52,8 +55,8 @@ const serverlessConfiguration: AWS = {
         ],
       },
       CLIENT_REDIRECT_URI: isOffline
-        ? `${process.env.CLIENT_REDIRECT_URI}`
-        : "http://localhost:3001/",
+        ? "http://localhost:3001/"
+        : "https://www.amplified.tools/",
       PKCE_ENABLED: process.env.PKCE_ENABLED || "false",
     },
   },

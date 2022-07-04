@@ -10,7 +10,20 @@ export const createSchedule: LambdaFunctionCustomIAM = {
       http: {
         method: "post",
         path: "schedules/create",
-        cors: true,
+        cors: {
+          origin: "*",
+          headers: [
+            "Content-Type",
+            "X-Amz-Date",
+            "Authorization",
+            "X-Api-Key",
+            "X-Amz-Security-Token",
+            "X-Amz-User-Agent",
+            "X-Amzn-Trace-Id",
+            "spotify",
+          ],
+          allowCredentials: false,
+        },
         authorizer: defaultUserPoolAuthorizer,
       },
     },
@@ -62,6 +75,14 @@ export const getSchedules: LambdaFunctionCustomIAM = {
       Effect: "Allow",
       Action: ["dynamodb:Query", "dynamodb:GetItem"],
       Resource: { "Fn::GetAtt": ["schedulesTable", "Arn"] },
+    },
+    {
+      Effect: "Allow",
+      Action: ["dynamodb:Query"],
+      Resource: {
+        // Combine table ARN with index for permission to query by index
+        "Fn::Join": ["", [{ "Fn::GetAtt": ["schedulesTable", "Arn"] }, "/index/user-index"]],
+      },
     },
   ],
 };
