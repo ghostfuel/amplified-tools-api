@@ -3,7 +3,7 @@ import type { AWS } from "@serverless/typescript";
 
 import { login, callback } from "./resources/functions/login";
 import { sort } from "./resources/functions/sort";
-import { createSchedule, getSchedules } from "./resources/functions/schedules";
+import { createSchedule, getSchedules, deleteSchedule } from "./resources/functions/schedules";
 import { scheduleRunner } from "./resources/functions/schedule-runner";
 import cognito from "./resources/cognito";
 import apiGateway from "./resources/api-gateway";
@@ -66,6 +66,7 @@ const serverlessConfiguration: AWS = {
     sort,
     createSchedule,
     getSchedules,
+    deleteSchedule,
     scheduleRunner,
   },
   resources: {

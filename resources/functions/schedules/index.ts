@@ -3,7 +3,7 @@ import { defaultUserPoolAuthorizer } from "../../api-gateway";
 
 export const createSchedule: LambdaFunctionCustomIAM = {
   name: "${self:service}-${self:provider.stage}-create-schedule",
-  handler: "resources/functions/schedules/handler.default",
+  handler: "resources/functions/schedules/create.default",
   description: "Scheduler-as-a-service for scheduling Spotify API actions",
   events: [
     {
@@ -83,6 +83,41 @@ export const getSchedules: LambdaFunctionCustomIAM = {
         // Combine table ARN with index for permission to query by index
         "Fn::Join": ["", [{ "Fn::GetAtt": ["schedulesTable", "Arn"] }, "/index/user-index"]],
       },
+    },
+  ],
+};
+
+export const deleteSchedule: LambdaFunctionCustomIAM = {
+  name: "${self:service}-${self:provider.stage}-delete-schedule",
+  handler: "resources/functions/schedules/delete.default",
+  description: "Delete schedule for the requesting user",
+  events: [
+    {
+      http: {
+        method: "delete",
+        path: "schedules/{scheduleId}",
+        cors: true,
+        authorizer: defaultUserPoolAuthorizer,
+      },
+    },
+  ],
+  iamRoleStatementsName: "${self:service}-${self:provider.stage}-delete-schedule-role",
+  iamRoleStatements: [
+    {
+      Effect: "Allow",
+      Action: ["dynamodb:GetItem", "dynamodb:DeleteItem"],
+      Resource: { "Fn::GetAtt": ["schedulesTable", "Arn"] },
+    },
+    {
+      Effect: "Allow",
+      Action: ["events:DeleteRule", "events:ListTargetsByRule", "events:RemoveTargets"],
+      Resource: "arn:aws:events:${self:provider.region}:${aws:accountId}:rule/schedule*",
+    },
+    {
+      Effect: "Allow",
+      Action: "lambda:RemovePermission",
+      Resource:
+        "arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-schedule-runner",
     },
   ],
 };

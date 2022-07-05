@@ -1,8 +1,8 @@
-import { generateCronTabFromTimestamp, ScheduleBodyParameters } from "./handler";
+import { generateCronTabFromTimestamp, ScheduleBodyParameters } from "./create";
 import { mockClient } from "aws-sdk-client-mock";
 import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from "@aws-sdk/client-eventbridge";
 import { AddPermissionCommand, Lambda } from "@aws-sdk/client-lambda";
-import schedulerCreate from "./handler";
+import schedulerCreate from "./create";
 import { generateApiGatewayEvent } from "@common/test-utils";
 
 describe("generateCronTabFromTimestamp", () => {
@@ -42,7 +42,7 @@ describe("generateCronTabFromTimestamp", () => {
   });
 });
 
-describe("Scheduler handler", () => {
+describe("Create Schedule handler", () => {
   const eventBridgeMock = mockClient(EventBridgeClient);
   const lambdaMock = mockClient(Lambda);
 
@@ -61,6 +61,7 @@ describe("Scheduler handler", () => {
 
     // Arrange: Test event with minimum required parameters
     const testBody: ScheduleBodyParameters = {
+      name: "test sort once",
       cadence: "once",
       operation: "sort",
       operationParameters: {

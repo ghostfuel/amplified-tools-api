@@ -1,8 +1,18 @@
 import logger, { addLoggerContext } from "@common/logger";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamoddbClient } from "@common/dynamodb";
+import { GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamoddbClient, ScheduleItem } from "@common/dynamodb";
 import { lambdaResponse } from "@common/lambda";
+
+export async function getSchedule(id: string, user: string): Promise<ScheduleItem> {
+  const getCommand = new GetCommand({
+    TableName: `amplified-tools-api-${process.env.STAGE}-schedules-table`,
+    Key: { id, user },
+  });
+
+  const getSchedulesRes = await dynamoddbClient.send(getCommand);
+  return getSchedulesRes.Item as ScheduleItem;
+}
 
 /**
  * Lambda to list a users schedules.
@@ -32,7 +42,7 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
     });
 
     const querySchedulesRes = await dynamoddbClient.send(query);
-    logger.info(`Retrieved schedules for ${user}`, querySchedulesRes);
+    logger.info(`Retrieved ${querySchedulesRes.Count} schedules for ${user}`);
 
     return lambdaResponse(200, JSON.stringify(querySchedulesRes.Items));
   } catch (error) {

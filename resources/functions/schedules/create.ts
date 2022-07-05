@@ -2,7 +2,7 @@ import logger, { addLoggerContext } from "@common/logger";
 import { Token } from "@custom/types/spotify";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from "@aws-sdk/client-eventbridge";
-import { dynamoddbClient } from "@common/dynamodb";
+import { dynamoddbClient, ScheduleItem } from "@common/dynamodb";
 import { Lambda } from "@aws-sdk/client-lambda";
 import Ajv, { JSONSchemaType } from "ajv";
 import addFormats from "ajv-formats";
@@ -15,6 +15,7 @@ const eventBridge = new EventBridgeClient({ region: "eu-west-2" });
 const lambda = new Lambda({ region: "eu-west-2" });
 
 export type ScheduleBodyParameters = {
+  name: string;
   operation: "sort";
   operationParameters: {
     playlistId: string;
@@ -30,10 +31,6 @@ export interface ScheduleRuleInput {
   id: string;
   user: string;
   rule: string;
-}
-
-export interface ScheduleRuleItem extends ScheduleRuleInput, ScheduleBodyParameters {
-  count: number;
 }
 
 const spotifyTokensSchema: JSONSchemaType<Token> = {
@@ -53,6 +50,7 @@ const scheduleBodyParameterSchema: JSONSchemaType<ScheduleBodyParameters> = {
   $id: "/ScheduleBodyParameters",
   type: "object",
   properties: {
+    name: { type: "string" },
     operation: { type: "string", enum: ["sort"] },
     operationParameters: { type: "object", required: ["playlistId", "property", "order"] },
     cadence: { type: "string", enum: ["once", "daily", "weekly", "monthly", "yearly"] },
@@ -163,13 +161,23 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
   // Add Input to DynamoDB schedule table and pass id to target rule input
   const scheduleInput: ScheduleRuleInput = {
     id: scheduleId,
-    user,
+    user: user,
     rule: ruleParams.Name,
   };
-  const scheduleItem: ScheduleRuleItem = {
-    ...scheduleInput,
-    ...scheduleParameters,
-    count: 0,
+
+  const scheduleItem: ScheduleItem = {
+    id: scheduleId,
+    user: user,
+    schedule: scheduleParameters.name,
+    rule: ruleParams.Name,
+    operation: operation,
+    operationParameters: scheduleParameters.operationParameters,
+    cadence: cadence,
+    scheduledTimestamp: scheduleParameters.timestamp,
+    spotify: scheduleParameters.spotify,
+    runCount: 0,
+    errorCount: 0,
+    createdAt: new Date().toISOString(),
   };
   const putItem = new PutCommand({
     TableName: `amplified-tools-api-${process.env.STAGE}-schedules-table`,

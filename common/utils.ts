@@ -69,10 +69,12 @@ interface ApiResponse<T> {
 }
 
 export async function getAllPagedRequest<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   endpoint: any,
   path = "items",
 ): Promise<ApiResponse<T>> {
   const response = await endpoint;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let items: any[] = get(response.body, path);
 
   while (response.body.next) {
