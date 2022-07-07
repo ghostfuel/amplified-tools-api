@@ -133,8 +133,9 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
   const { operation, cadence, timestamp } = scheduleParameters;
   const scheduleExpression = generateCronTabFromTimestamp(cadence, new Date(timestamp));
   const ruleParams = {
-    Name: `schedule-${operation}-${cadence}-rule-${scheduleId}`,
+    Name: `schedule-rule-${scheduleId}`,
     ScheduleExpression: scheduleExpression,
+    Description: `${operation} ${cadence} from ${timestamp} for user (${user})`,
   };
 
   // Create EventBridge Rule

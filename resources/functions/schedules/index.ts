@@ -55,9 +55,33 @@ export const createSchedule: LambdaFunctionCustomIAM = {
   ],
 };
 
+export const getSchedule: LambdaFunctionCustomIAM = {
+  name: "${self:service}-${self:provider.stage}-get-schedule",
+  handler: "resources/functions/schedules/get.getScheduleHandler",
+  description: "Get schedule for the requesting user",
+  events: [
+    {
+      http: {
+        method: "get",
+        path: "schedules/{scheduleId}",
+        cors: true,
+        authorizer: defaultUserPoolAuthorizer,
+      },
+    },
+  ],
+  iamRoleStatementsName: "${self:service}-${self:provider.stage}-get-schedule-role",
+  iamRoleStatements: [
+    {
+      Effect: "Allow",
+      Action: ["dynamodb:GetItem"],
+      Resource: { "Fn::GetAtt": ["schedulesTable", "Arn"] },
+    },
+  ],
+};
+
 export const getSchedules: LambdaFunctionCustomIAM = {
   name: "${self:service}-${self:provider.stage}-get-schedules",
-  handler: "resources/functions/schedules/get.default",
+  handler: "resources/functions/schedules/get.getSchedulesHandler",
   description: "List schedules for the requesting user",
   events: [
     {
@@ -118,6 +142,35 @@ export const deleteSchedule: LambdaFunctionCustomIAM = {
       Action: "lambda:RemovePermission",
       Resource:
         "arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-schedule-runner",
+    },
+  ],
+};
+
+export const updateSchedule: LambdaFunctionCustomIAM = {
+  name: "${self:service}-${self:provider.stage}-update-schedule",
+  handler: "resources/functions/schedules/update.default",
+  description: "Update schedule for the requesting user",
+  events: [
+    {
+      http: {
+        method: "put",
+        path: "schedules/{scheduleId}",
+        cors: true,
+        authorizer: defaultUserPoolAuthorizer,
+      },
+    },
+  ],
+  iamRoleStatementsName: "${self:service}-${self:provider.stage}-update-schedule-role",
+  iamRoleStatements: [
+    {
+      Effect: "Allow",
+      Action: ["dynamodb:PutItem"],
+      Resource: { "Fn::GetAtt": ["schedulesTable", "Arn"] },
+    },
+    {
+      Effect: "Allow",
+      Action: ["events:PutRule"],
+      Resource: "arn:aws:events:${self:provider.region}:${aws:accountId}:rule/schedule*",
     },
   ],
 };
