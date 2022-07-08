@@ -180,9 +180,14 @@ export const callback = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
     };
   }
 
+  // Calculate expiration time
+  const expiresAt = new Date();
+  expiresAt.setSeconds(expiresAt.getSeconds() + tokenResponse.expires_in);
+
   const redirectParams = new URLSearchParams({
     access_token: tokenResponse.access_token,
     refresh_token: tokenResponse.refresh_token,
+    expires_at: expiresAt.toISOString(),
   });
 
   return {
