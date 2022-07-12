@@ -16,21 +16,28 @@ export function createLogger(label?: string, context?: LoggerContext) {
   let consoleFormat = format.combine(format.timestamp(), format.json());
 
   // Custom console log format when not in Lambda
-  if (!process.env.LAMBDA_TASK_ROOT) {
+  if (!process.env.LAMBDA_TASK_ROOT || process.env.IS_OFFLINE) {
     consoleFormat = format.combine(
       format.timestamp(),
       format.colorize(),
       format.printf((log) => {
         const meta = {
           ...log,
+          // Remove context objects for easier readablity in console
+          context: undefined,
           timestamp: undefined,
           label: undefined,
           level: undefined,
           message: undefined,
         };
-        return `${log.timestamp} ${log.level}: [${log.label}] ${log.message}, ${JSON.stringify(
-          meta,
-        )}`;
+
+        let message = `${log.timestamp} ${log.level}: [${log.label}] ${log.message}`;
+
+        // Do not add object properties to log message if the object is empty
+        const metaString = JSON.stringify(meta);
+        if (metaString !== "{}") message += `, ${metaString}`;
+
+        return message;
       }),
     );
   }
