@@ -115,7 +115,6 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
     return lambdaResponse(400, "Missing user identifier");
   }
 
-  // Check for a spotify credentials
   if (!event.body) {
     return lambdaResponse(400, "Missing body parameters");
   }

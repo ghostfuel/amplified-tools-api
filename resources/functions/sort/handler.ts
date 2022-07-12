@@ -1,10 +1,9 @@
 import logger, { addLoggerContext } from "@common/logger";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { sortBy } from "lodash";
+import { get, orderBy } from "lodash";
 import spotify from "@common/spotify-api";
-import { getAllPagedRequest, sortArtists } from "@common/utils";
+import { getAllPagedRequest, sortPlaylistTracksByArtists } from "@common/utils";
 
-// TODO: Restrict parameters later
 export type SortParameters = {
   property: "added_at" | "track.artists" | "track.album.name" | "track.name";
   order: "asc" | "desc";
@@ -38,8 +37,10 @@ export const sort = async (
   );
   const { items } = allPlaylistTracks.body;
 
-  // Sort according to supplied property and order
-  const sorted = property.includes("artist") ? sortArtists(items) : sortBy(items, property);
+  // Sort according to supplied property (artist or lowercase any string property) and order
+  const sorted = property.includes("artist")
+    ? sortPlaylistTracksByArtists(items)
+    : orderBy(items, [(item) => get(item, property).toLowerCase()]);
   if (order === "desc") sorted.reverse();
 
   // Check if already sorted...
@@ -51,9 +52,7 @@ export const sort = async (
   // Sort the playlist track by track
   let snapshotId;
   for (const [position, track] of sorted.entries()) {
-    const originalPos = items.findIndex(
-      (item: SpotifyApi.PlaylistTrackObject) => item.track?.uri === track.track?.uri,
-    );
+    const originalPos = items.findIndex((item) => item.track?.uri === track.track?.uri);
 
     // if Original Position and new Position are the same, skip.
     if (position === originalPos) continue;
