@@ -22,6 +22,7 @@
     "space-before-function-paren": ["error", { "anonymous": "ignore", "named": "never" }],
     "no-undef": "warn",
     "multiline-ternary": "off",
-    "no-case-declarations": "off"
+    "no-case-declarations": "off",
+    "jest/no-conditional-expect": "off"
   }
 }

@@ -38,7 +38,6 @@ describe("runSourceOperation", () => {
     try {
       await runSourceOperation(sourceOperation);
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual("Access Token has not been set.");
     }
   });
@@ -46,11 +45,10 @@ describe("runSourceOperation", () => {
   test("should error when given an unknown operation", async () => {
     const getAccessTokenMock = jest.spyOn(spotify, "getAccessToken");
     getAccessTokenMock.mockReturnValue("test-token");
-    const unknownOperation = { type: "lol" } as unknown as SourceOperation;
+    const unknownOperation = { type: "unknown" } as unknown as SourceOperation;
     try {
       await runSourceOperation(unknownOperation);
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual(`Invalid Operation: ${unknownOperation.type}.`);
     }
   });
@@ -146,7 +144,6 @@ describe("getArtistSource", () => {
     try {
       await getArtistSource({});
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual("Must provide a uri or artist and country.");
     }
   });
@@ -263,7 +260,6 @@ describe("getAlbumSource", () => {
     try {
       await getAlbumSource({});
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual("Must supply at least one of; uri, title");
     }
 
@@ -365,7 +361,6 @@ describe("getTrackSource", () => {
     try {
       await getTrackSource({});
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual("Must supply at least one of; uri, title");
     }
 
@@ -557,7 +552,6 @@ describe("getPlaylistSource", () => {
     try {
       await getTrackSource({});
     } catch (error) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(error.message).toEqual("Must supply at least one of; uri, title");
     }
 
