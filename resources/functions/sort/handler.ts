@@ -3,6 +3,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { get, orderBy } from "lodash";
 import spotify from "@common/spotify-api";
 import { getAllPagedRequest, sortPlaylistTracksByArtists } from "@common/utils";
+import { lambdaResponse } from "@common/lambda";
 
 export type SortParameters = {
   property: "added_at" | "track.artists" | "track.album.name" | "track.name";
@@ -96,52 +97,23 @@ export default async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResul
 
   // Check for a spotify access token
   if (!accessToken) {
-    return {
-      statusCode: 401,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: "Unauthorized",
-    };
+    return lambdaResponse(401, "Unauthorized");
   }
 
   spotify.setAccessToken(accessToken);
 
   // Check for valid property and order parameters
   if (!playlistId || !isSortProperty(property) || !isSortOrder(order)) {
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: "Missing or invalid path parameters",
-    };
+    return lambdaResponse(400, "Missing or invalid path parameters");
   }
 
   try {
     await sort(playlistId, property, order);
 
-    return {
-      statusCode: 200,
-      // TODO: sort out cors responses
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: `Playlist (${playlistId}) sorted.`,
-    };
+    return lambdaResponse(200, `Playlist (${playlistId}) sorted.`);
   } catch (error) {
     logger.error("Failed to sort playlist", error);
 
-    return {
-      statusCode: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: "Failed to sort playlist",
-    };
+    return lambdaResponse(500, "Failed to sort playlist");
   }
 };
