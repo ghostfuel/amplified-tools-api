@@ -1,4 +1,6 @@
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "jest.jestCommandLine": "jest",
+  "jest.rootPath": "node node_modules/jest/bin/jest.js"
 }

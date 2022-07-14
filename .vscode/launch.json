@@ -8,7 +8,6 @@
       "type": "node",
       "request": "launch",
       "name": "Jest: current file",
-      //"env": { "NODE_ENV": "test" },
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "console": "internalConsole",
       "windows": {
@@ -25,23 +24,11 @@
       "runtimeArgs": ["--lazy"],
       "outFiles": ["${workspaceFolder}/.webpack/**/*.js"],
       "runtimeExecutable": "node",
-      "env": {
-        // Here we set some environment vars that should be set locally.
-        // They can and will overwrite the ones coming from your serverless.yml
-      },
+      "env": {},
       "envFile": "${workspaceFolder}/.env",
       "windows": {
         "program": "${workspaceRoot}\\node_modules\\serverless\\bin\\serverless"
       }
-    },
-    {
-      "name": "Debug Serverless Offline",
-      "request": "launch",
-      "runtimeArgs": ["run", "debug"],
-      "runtimeExecutable": "npm",
-      "skipFiles": ["<node_internals>/**"],
-      "type": "node",
-      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

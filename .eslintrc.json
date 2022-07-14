@@ -21,6 +21,7 @@
     "max-len": ["error", 100, { "ignoreComments": true, "ignoreStrings": true }],
     "space-before-function-paren": ["error", { "anonymous": "ignore", "named": "never" }],
     "no-undef": "warn",
-    "multiline-ternary": "off"
+    "multiline-ternary": "off",
+    "no-case-declarations": "off"
   }
 }
