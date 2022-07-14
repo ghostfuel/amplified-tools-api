@@ -55,7 +55,7 @@ export function createLogger(label?: string, context?: LoggerContext) {
 export function addLoggerContext(logger: Logger, event: APIGatewayProxyEvent, label?: string) {
   let user = event?.requestContext.identity.user;
 
-  if (!event.headers["Authorization"]) {
+  if (!event.headers || !event.headers["Authorization"]) {
     logger.info("No Authorization header", event.requestContext);
   } else {
     // Decode token for user id
