@@ -2,6 +2,7 @@ import sortHandler, { sort } from "./handler";
 import spotify from "@common/spotify-api";
 import { playlistTracksResponse } from "@common/test-data";
 import { generateApiGatewayEvent } from "@common/test-utils";
+import { lambdaResponse } from "@common/lambda";
 
 // Mock node-fetch just incase
 jest.mock("node-fetch");
@@ -11,9 +12,11 @@ describe("Sort handler", () => {
   const getPlaylistTracksMock = jest.spyOn(spotify, "getPlaylistTracks");
   const reorderTracksInPlaylistMock = jest.spyOn(spotify, "reorderTracksInPlaylist");
 
+  // eslint-disable-next-line jest/no-focused-tests
   test("should sort a playlist of 5 items in ascending order by 'track.artists'", async () => {
     // Arrange: Test event with minimum required parameters
     const testSpotifyEvent = generateApiGatewayEvent({
+      resource: "sort handler sort artists test",
       headers: { spotify: "test-token" },
       pathParameters: { playlistId: "test-playlist" },
       queryStringParameters: { property: "track.artists", order: "asc" },
@@ -42,15 +45,15 @@ describe("Sort handler", () => {
     const response = await sortHandler(testSpotifyEvent);
 
     // Assert
-    expect(response).toEqual({
-      statusCode: 200,
-      body: `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`,
-    });
+    expect(response).toEqual(
+      lambdaResponse(200, `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`),
+    );
   });
 
   test("should sort a playlist of 5 items in descending order by 'track.name'", async () => {
     // Arrange: Test event with minimum required parameters
     const testSpotifyEvent = generateApiGatewayEvent({
+      resource: "sort handler sort name test",
       headers: { spotify: "test-token" },
       pathParameters: { playlistId: "test-playlist" },
       queryStringParameters: { property: "track.name", order: "desc" },
@@ -79,15 +82,15 @@ describe("Sort handler", () => {
     const response = await sortHandler(testSpotifyEvent);
 
     // Assert
-    expect(response).toEqual({
-      statusCode: 200,
-      body: `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`,
-    });
+    expect(response).toEqual(
+      lambdaResponse(200, `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`),
+    );
   });
 
   test("should sort a playlist of 5 items in descending order by 'added_at'", async () => {
     // Arrange: Test event with minimum required parameters
     const testSpotifyEvent = generateApiGatewayEvent({
+      resource: "sort handler sort added_at test",
       headers: { spotify: "test-token" },
       pathParameters: { playlistId: "test-playlist" },
       queryStringParameters: { property: "added_at", order: "desc" },
@@ -116,15 +119,15 @@ describe("Sort handler", () => {
     const response = await sortHandler(testSpotifyEvent);
 
     // Assert
-    expect(response).toEqual({
-      statusCode: 200,
-      body: `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`,
-    });
+    expect(response).toEqual(
+      lambdaResponse(200, `Playlist (${testSpotifyEvent.pathParameters?.playlistId}) sorted.`),
+    );
   });
 
   test("should error 401 on unauthorized when no spotify access token provided", async () => {
     // Arrange: Test event with minimum required parameters
     const testSpotifyEvent = generateApiGatewayEvent({
+      resource: "Sort handler 401 test",
       headers: undefined,
       pathParameters: { playlistId: "test-playlist" },
       queryStringParameters: { property: "track.artists", order: "asc" },
@@ -133,15 +136,13 @@ describe("Sort handler", () => {
     const response = await sortHandler(testSpotifyEvent);
 
     // Assert
-    expect(response).toEqual({
-      statusCode: 401,
-      body: "Unauthorized",
-    });
+    expect(response).toEqual(lambdaResponse(401, "Unauthorized"));
   });
 
   test("should error 400 on invalid path parameters", async () => {
     // Arrange: Test event with minimum required parameters
     const testSpotifyEvent = generateApiGatewayEvent({
+      resource: "Sort handler 400 test",
       headers: { spotify: "test-token" },
       pathParameters: { playlistId: "test-playlist" },
     });
@@ -149,10 +150,7 @@ describe("Sort handler", () => {
     const response = await sortHandler(testSpotifyEvent);
 
     // Assert
-    expect(response).toEqual({
-      statusCode: 400,
-      body: "Missing or invalid path parameters",
-    });
+    expect(response).toEqual(lambdaResponse(400, "Missing or invalid path parameters"));
   });
 
   test("should skip sorting an already sorted playlist", async () => {

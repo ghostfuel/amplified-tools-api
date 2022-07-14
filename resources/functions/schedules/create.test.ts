@@ -4,6 +4,8 @@ import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from "@aws-sdk/c
 import { AddPermissionCommand, Lambda } from "@aws-sdk/client-lambda";
 import schedulerCreate from "./create";
 import { generateApiGatewayEvent } from "@common/test-utils";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { lambdaResponse } from "@common/lambda";
 
 describe("generateCronTabFromTimestamp", () => {
   test("should create a one time crontab from a timestamp", async () => {
@@ -44,6 +46,7 @@ describe("generateCronTabFromTimestamp", () => {
 
 describe("Create Schedule handler", () => {
   const eventBridgeMock = mockClient(EventBridgeClient);
+  const dynamoddbClientMock = mockClient(DynamoDBDocumentClient);
   const lambdaMock = mockClient(Lambda);
 
   beforeEach(() => {
@@ -58,6 +61,7 @@ describe("Create Schedule handler", () => {
       .resolves({ RuleArn: "arn:aws:events:<region>:<account_id>:rule:MyTestRule" });
     lambdaMock.on(AddPermissionCommand).resolves({ Statement: "Test" });
     eventBridgeMock.on(PutTargetsCommand).resolves({ FailedEntryCount: 0 });
+    dynamoddbClientMock.on(PutCommand).resolves({ Attributes: { id: "Test" } });
 
     // Arrange: Test event with minimum required parameters
     const testBody: ScheduleBodyParameters = {
@@ -78,10 +82,10 @@ describe("Create Schedule handler", () => {
 
     const response = await schedulerCreate(testSchedulerCreateEvent);
 
-    expect(response).toEqual({
-      statusCode: 200,
-      body: JSON.stringify({ FailedEntryCount: 0 }),
-    });
+    expect(eventBridgeMock.calls().length).toEqual(2);
+    expect(lambdaMock.calls().length).toEqual(1);
+    expect(dynamoddbClientMock.calls().length).toEqual(1);
+    expect(response).toEqual(lambdaResponse(200, JSON.stringify({ FailedEntryCount: 0 })));
   });
 
   test("should error for missing body", async () => {
@@ -89,11 +93,7 @@ describe("Create Schedule handler", () => {
     const testSchedulerCreateEvent = generateApiGatewayEvent();
 
     const response = await schedulerCreate(testSchedulerCreateEvent);
-
-    expect(response).toEqual({
-      statusCode: 400,
-      body: "Missing body parameters",
-    });
+    expect(response).toEqual(lambdaResponse(400, "Missing body parameters"));
   });
 
   test("should error for invalid schedule create parameters", async () => {
@@ -108,10 +108,6 @@ describe("Create Schedule handler", () => {
     });
 
     const response = await schedulerCreate(testSchedulerCreateEvent);
-
-    expect(response).toEqual({
-      statusCode: 400,
-      body: "Invalid body parameters",
-    });
+    expect(response).toEqual(lambdaResponse(400, "Invalid body parameters"));
   });
 });

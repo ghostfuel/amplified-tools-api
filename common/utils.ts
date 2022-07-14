@@ -91,12 +91,6 @@ function sortArtists<T>(collection: T[], seed?: object): T[] {
     ...seed,
   };
 
-  // Remove "track" shorthand property if it is not in the collection
-  if (!get(collection, "track")) {
-    options.propertyPath = options.propertyPath.replace("track.", "");
-    options.extendedFields = options.extendedFields.map((s) => s.replace("track.", ""));
-  }
-
   // check for TrackObjectFull
   if (get(collection, "artists")) {
     options.propertyPath = options.propertyPath.replace("track.", "");
@@ -113,7 +107,7 @@ function sortArtists<T>(collection: T[], seed?: object): T[] {
     const artistsB = get(b, options.propertyPath);
 
     if (!artistsA || !artistsB) {
-      logger.error("Missing artist to compare", artistsA, artistsB);
+      logger.error("Missing artists to compare", { artistsA, artistsB });
     }
 
     const artistA = artistsA
@@ -184,6 +178,27 @@ interface ApiResponse<T> {
   body: T;
   headers: Record<string, string>;
   statusCode: number;
+}
+
+export async function getAllPlaylistTracks(id: string, limit = Infinity) {
+  const getTracksParams = { limit, offset: 0 };
+
+  // Handle larger limits than API allows
+  if (limit > 100) getTracksParams.limit = 100;
+
+  let playlistTracksRes = await spotifyApi.getPlaylistTracks(id, getTracksParams);
+  let playlistTracks = playlistTracksRes.body?.items;
+
+  while (playlistTracksRes.body.next || playlistTracks.length === limit) {
+    // Calculate next page size to satisfy limit
+    const remaining = limit - getTracksParams.offset;
+    getTracksParams.offset += remaining > 100 ? 100 : remaining;
+
+    playlistTracksRes = await spotifyApi.getPlaylistTracks(id, getTracksParams);
+    playlistTracks = playlistTracks.concat(playlistTracksRes.body?.items);
+  }
+
+  return playlistTracks;
 }
 
 export async function getAllPagedRequest<T>(
