@@ -1,6 +1,6 @@
 import logger from "@common/logger";
 import spotifyApi from "@common/spotify-api";
-import { getAllPlaylistTracks, parseUri } from "@common/utils";
+import { getAllPlaylistTracks, getAllUserPlaylists, parseUri } from "@common/utils";
 import { UnknownOperation } from "@custom/types/workflow";
 import ActionOperation, { SaveAction, SaveActionParams } from "@custom/types/workflow/actions";
 import { differenceWith, chunk } from "lodash";
@@ -35,9 +35,8 @@ export async function runSaveAction(
     id = parseUri(uri).id;
   } else if (name) {
     // Search for the users playlist with that name
-    // TODO: handle multiple pages
-    const userPlaylists = await spotifyApi.getUserPlaylists({ limit: 50 });
-    id = userPlaylists.body.items.find((playlist) => playlist.name.includes(name))?.id;
+    const userPlaylists = await getAllUserPlaylists();
+    id = userPlaylists.find((playlist) => playlist.name === name)?.id;
   }
 
   // If we have no ID, make a new playlist with the supplied name

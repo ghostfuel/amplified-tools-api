@@ -3,6 +3,7 @@ import api from "@common/spotify-api";
 import {
   buildSearchTerm,
   getAllPlaylistTracks,
+  getAllUserPlaylists,
   parseUri,
   removeLocalTracks,
   replaceAllLocalTracks,
@@ -161,9 +162,8 @@ export async function getPlaylistSource(
     id = parseUri(uri).id;
   } else if (name) {
     // Search for the users playlist with that name
-    // TODO: handle multiple pages
-    const userPlaylists = await api.getUserPlaylists({ limit: 50 });
-    id = userPlaylists.body.items.find((playlist) => playlist.name.includes(name))?.id;
+    const userPlaylists = await getAllUserPlaylists(limit);
+    id = userPlaylists.find((playlist) => playlist.name === name)?.id;
   }
 
   if (!id) {

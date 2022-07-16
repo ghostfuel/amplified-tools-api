@@ -2,7 +2,7 @@ import logger, { addLoggerContext } from "@common/logger";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { get, orderBy } from "lodash";
 import spotify from "@common/spotify-api";
-import { getAllPagedRequest, sortPlaylistTracksByArtists } from "@common/utils";
+import { getAllPlaylistTracks, sortPlaylistTracksByArtists } from "@common/utils";
 import { lambdaResponse } from "@common/lambda";
 
 export type SortParameters = {
@@ -33,10 +33,7 @@ export const sort = async (
   order: SortParameters["order"],
 ): Promise<SpotifyApi.PlaylistTrackObject[]> => {
   // Get Playlist Tracks
-  const allPlaylistTracks = await getAllPagedRequest<SpotifyApi.PlaylistTrackResponse>(
-    spotify.getPlaylistTracks(playlistId),
-  );
-  const { items } = allPlaylistTracks.body;
+  const items = await getAllPlaylistTracks(playlistId);
 
   // Sort according to supplied property (artist or lowercase any string property) and order
   const sorted = property.includes("artist")

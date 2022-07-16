@@ -1,5 +1,4 @@
-import { get, set } from "lodash";
-import fetch from "node-fetch";
+import { get } from "lodash";
 import logger from "./logger";
 import spotifyApi from "./spotify-api";
 
@@ -174,12 +173,6 @@ export function sortPlaylistTracksByArtists(
   return sortArtists(playlistTracks, options);
 }
 
-interface ApiResponse<T> {
-  body: T;
-  headers: Record<string, string>;
-  statusCode: number;
-}
-
 export async function getAllPlaylistTracks(id: string, limit = Infinity) {
   const getTracksParams = { limit, offset: 0 };
 
@@ -201,27 +194,25 @@ export async function getAllPlaylistTracks(id: string, limit = Infinity) {
   return playlistTracks;
 }
 
-export async function getAllPagedRequest<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  endpoint: any,
-  path = "items",
-): Promise<ApiResponse<T>> {
-  const response = await endpoint;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let items: any[] = get(response.body, path);
+export async function getAllUserPlaylists(limit = Infinity) {
+  const getUserPlaylistsParams = { limit, offset: 0 };
 
-  while (response.body.next) {
-    const request = await fetch(response.body.next, {
-      headers: { authorization: `Bearer ${spotifyApi.getAccessToken()}` },
-    });
+  // Handle larger limits than API allows
+  if (limit > 100) getUserPlaylistsParams.limit = 100;
 
-    response.body = await request.json();
-    response.statusCode = request.status;
-    items = items.concat(get(response.body, path));
+  let userPlaylistsRes = await spotifyApi.getUserPlaylists(getUserPlaylistsParams);
+  let userPlaylists = userPlaylistsRes.body?.items;
+
+  while (userPlaylistsRes.body.next || userPlaylists.length === limit) {
+    // Calculate next page size to satisfy limit
+    const remaining = limit - getUserPlaylistsParams.offset;
+    getUserPlaylistsParams.offset += remaining > 50 ? 50 : remaining;
+
+    userPlaylistsRes = await spotifyApi.getUserPlaylists(getUserPlaylistsParams);
+    userPlaylists = userPlaylists.concat(userPlaylistsRes.body?.items);
   }
 
-  response.body = set(response.body, path, items);
-  return response;
+  return userPlaylists;
 }
 
 // Fisher-yates shuffle

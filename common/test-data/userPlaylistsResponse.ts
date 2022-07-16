@@ -794,8 +794,8 @@ export const userPlaylistsResponse: SpotifyApi.ListOfCurrentUsersPlaylistsRespon
     },
   ],
   limit: 20,
-  next: "https://api.spotify.com/v1/users/ghostfuel/playlists?offset=20&limit=20",
+  next: null,
   offset: 0,
   previous: null,
-  total: 52,
+  total: 20,
 };
