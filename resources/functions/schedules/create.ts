@@ -10,18 +10,21 @@ import { SortParameters } from "../sort/handler";
 import { nanoid } from "nanoid";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { lambdaResponse } from "@common/lambda";
+import Workflow from "@custom/types/workflow";
 
 const eventBridge = new EventBridgeClient({ region: "eu-west-2" });
 const lambda = new Lambda({ region: "eu-west-2" });
 
 export type ScheduleBodyParameters = {
   name: string;
-  operation: "sort";
-  operationParameters: {
-    playlistId: string;
-    property: SortParameters["property"];
-    order: SortParameters["order"];
-  };
+  operation: "sort" | "workflow";
+  operationParameters:
+    | {
+        playlistId: string;
+        property: SortParameters["property"];
+        order: SortParameters["order"];
+      }
+    | Workflow;
   cadence: "once" | "daily" | "weekly" | "monthly" | "yearly";
   timestamp: string;
   spotify: Partial<Token>;
@@ -51,13 +54,13 @@ const scheduleBodyParameterSchema: JSONSchemaType<ScheduleBodyParameters> = {
   type: "object",
   properties: {
     name: { type: "string" },
-    operation: { type: "string", enum: ["sort"] },
-    operationParameters: { type: "object", required: ["playlistId", "property", "order"] },
+    operation: { type: "string", enum: ["sort", "workflow"] },
+    operationParameters: { type: "object", required: [] },
     cadence: { type: "string", enum: ["once", "daily", "weekly", "monthly", "yearly"] },
     timestamp: { type: "string", format: "date-time" },
     spotify: { $ref: "/SpotifyTokens" },
   },
-  required: ["operation", "operationParameters", "cadence", "timestamp", "spotify"],
+  required: ["name", "operation", "operationParameters", "cadence", "timestamp", "spotify"],
   additionalProperties: false,
 };
 
