@@ -26,6 +26,7 @@ describe("runSaveAction", () => {
   // Save
   const replaceTracksInPlaylist = jest.spyOn(spotify, "replaceTracksInPlaylist");
   const addTracksToPlaylist = jest.spyOn(spotify, "addTracksToPlaylist");
+  const changePlaylistDetails = jest.spyOn(spotify, "changePlaylistDetails");
 
   // Update
   const getPlaylistTracks = jest.spyOn(spotify, "getPlaylistTracks");
@@ -33,7 +34,14 @@ describe("runSaveAction", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     getAccessTokenMock.mockReturnValue("test-token");
+
+    changePlaylistDetails.mockResolvedValue({
+      body: "Playlist Updated",
+      headers: {},
+      statusCode: 200,
+    });
   });
 
   test("should save tracks to a new playlist", async () => {

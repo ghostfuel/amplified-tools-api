@@ -21,6 +21,8 @@ export async function runSaveAction(
   params: SaveActionParams,
 ) {
   const { uri, name, append, reorder } = params;
+  const { description, isPublic, isCollaborative } = params;
+
   if (!(uri || name)) {
     throw new Error("Must supply at least one of; uri, name");
   }
@@ -41,7 +43,6 @@ export async function runSaveAction(
 
   // If we have no ID, make a new playlist with the supplied name
   if (!id && name) {
-    const { description, isPublic, isCollaborative } = params;
     // TODO: Public and Profile visibility has changed, may need another call here to not show the playlist on a profile vs. public/private
     const newPlaylist = await spotifyApi.createPlaylist(name, {
       description,
@@ -53,6 +54,16 @@ export async function runSaveAction(
 
   // Chunk tracks and save/update playlist
   if (id) {
+    // Update any playlist details first
+    if (description || isPublic !== undefined || !isCollaborative !== undefined) {
+      await spotifyApi.changePlaylistDetails(id, {
+        description,
+        public: isPublic,
+        collaborative: isCollaborative,
+      });
+      logger.info("Updated playlist details");
+    }
+
     if (reorder) {
       return update(tracks, id);
     }

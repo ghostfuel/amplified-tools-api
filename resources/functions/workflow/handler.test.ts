@@ -26,6 +26,7 @@ describe("runWorkflow handler", () => {
   // Sorters
   // Actions
   const createPlaylistMock = jest.spyOn(spotify, "createPlaylist");
+  const changePlaylistDetailsMock = jest.spyOn(spotify, "changePlaylistDetails");
   const replaceTracksInPlaylistMock = jest.spyOn(spotify, "replaceTracksInPlaylist");
   const addTracksToPlaylistMock = jest.spyOn(spotify, "addTracksToPlaylist");
   const reorderTracksInPlaylistMock = jest.spyOn(spotify, "reorderTracksInPlaylist");
@@ -40,6 +41,12 @@ describe("runWorkflow handler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getAccessTokenMock.mockReturnValue("test-token");
+
+    changePlaylistDetailsMock.mockResolvedValue({
+      body: "Playlist Updated",
+      headers: {},
+      statusCode: 200,
+    });
   });
 
   test("run a simple [source, sorter, action] workflow", async () => {
