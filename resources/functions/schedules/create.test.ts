@@ -8,36 +8,36 @@ import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { lambdaResponse } from "@common/lambda";
 
 describe("generateCronTabFromTimestamp", () => {
-  test("should create a one time crontab from a timestamp", async () => {
-    const now = new Date("2021-11-22T03:24:00");
+  test("should create a one time crontab from a timestamp (UTC)", async () => {
+    const now = new Date("2021-11-22T03:24:00.000Z");
     const cron = generateCronTabFromTimestamp("once", now);
     const expectedCron = "cron(24 3 22 11 ? 2021)";
     expect(cron).toEqual(expectedCron);
   });
 
-  test("should create a daily crontab from a timestamp", async () => {
-    const now = new Date("2021-11-22T03:24:00");
+  test("should create a daily crontab from a timestamp (UTC)", async () => {
+    const now = new Date("2021-11-22T03:24:00.000Z");
     const cron = generateCronTabFromTimestamp("daily", now);
     const expectedCron = "cron(24 3 * * ? 2021)";
     expect(cron).toEqual(expectedCron);
   });
 
-  test("should create a weekly crontab from a timestamp", async () => {
-    const now = new Date("2022-06-17T03:24:00");
+  test("should create a weekly crontab from a timestamp (UTC)", async () => {
+    const now = new Date("2022-06-17T03:24:00.000Z");
     const cron = generateCronTabFromTimestamp("weekly", now);
     const expectedCron = "cron(24 3 ? * 6 2022)";
     expect(cron).toEqual(expectedCron);
   });
 
-  test("should create a monthly crontab from a timestamp", async () => {
-    const now = new Date("2022-06-17T03:24:00");
+  test("should create a monthly crontab from a timestamp (UTC)", async () => {
+    const now = new Date("2022-06-17T03:24:00.000Z");
     const cron = generateCronTabFromTimestamp("monthly", now);
     const expectedCron = "cron(24 3 17 * ? 2022)";
     expect(cron).toEqual(expectedCron);
   });
 
-  test("should create a yearky crontab from a timestamp", async () => {
-    const now = new Date("2022-06-17T03:24:00");
+  test("should create a yearky crontab from a timestamp (UTC)", async () => {
+    const now = new Date("2022-06-17T03:24:00.000Z");
     const cron = generateCronTabFromTimestamp("yearly", now);
     const expectedCron = "cron(24 3 17 6 ? *)";
     expect(cron).toEqual(expectedCron);

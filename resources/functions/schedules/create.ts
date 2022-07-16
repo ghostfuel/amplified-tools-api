@@ -73,22 +73,22 @@ export function generateCronTabFromTimestamp(
   timestamp: Date,
 ) {
   // Default setup to 'monthly' cadence
-  const minutes = timestamp.getMinutes();
-  const hours = timestamp.getHours();
-  let dayOfMonth = `${timestamp.getDate()}`;
+  const minutes = timestamp.getUTCMinutes();
+  const hours = timestamp.getUTCHours();
+  let dayOfMonth = `${timestamp.getUTCDate()}`;
   let month = "*";
   let dayOfWeek = "?";
-  let year = `${timestamp.getFullYear()}`;
+  let year = `${timestamp.getUTCFullYear()}`;
 
   if (cadence === "once") {
-    month = `${timestamp.getMonth() + 1}`;
+    month = `${timestamp.getUTCMonth() + 1}`;
   } else if (cadence === "daily") {
     dayOfMonth = "*";
   } else if (cadence === "weekly") {
     dayOfMonth = "?";
-    dayOfWeek = `${timestamp.getDay() + 1}`;
+    dayOfWeek = `${timestamp.getUTCDay() + 1}`;
   } else if (cadence === "yearly") {
-    month = `${timestamp.getMonth() + 1}`;
+    month = `${timestamp.getUTCMonth() + 1}`;
     year = "*";
   }
 
