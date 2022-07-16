@@ -198,7 +198,7 @@ export async function getAllUserPlaylists(limit = Infinity) {
   const getUserPlaylistsParams = { limit, offset: 0 };
 
   // Handle larger limits than API allows
-  if (limit > 100) getUserPlaylistsParams.limit = 100;
+  if (limit > 50) getUserPlaylistsParams.limit = 50;
 
   let userPlaylistsRes = await spotifyApi.getUserPlaylists(getUserPlaylistsParams);
   let userPlaylists = userPlaylistsRes.body?.items;
