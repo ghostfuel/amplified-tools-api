@@ -110,4 +110,6 @@ describe("Create Schedule handler", () => {
     const response = await schedulerCreate(testSchedulerCreateEvent);
     expect(response).toEqual(lambdaResponse(400, "Invalid body parameters"));
   });
+
+  // TODO: Write test for scheduling a workflow operation
 });

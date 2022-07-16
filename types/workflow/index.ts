@@ -1,3 +1,4 @@
+import { ScheduleItem } from "@common/dynamodb";
 import { Token } from "../spotify";
 import ActionOperation from "./actions";
 import FilterOperation from "./filters";
@@ -22,11 +23,16 @@ export type Operations =
   | FilterOperation
   | ActionOperation;
 
-type Workflow = {
+export type Workflow = {
   operations: Operations[];
   errors: Error[];
   results: SpotifyApi.TrackObjectFull[];
   spotifyTokens?: Token;
 };
+
+export interface WorkflowScheduleItem extends ScheduleItem {
+  operation: "workflow";
+  operationParameters: Workflow;
+}
 
 export default Workflow;

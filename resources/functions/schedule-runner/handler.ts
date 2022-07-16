@@ -5,6 +5,8 @@ import { sort } from "../sort/handler";
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoddbClient, ScheduleItem } from "@common/dynamodb";
 import { deleteSchedule } from "../schedules/delete";
+import { WorkflowScheduleItem } from "@custom/types/workflow";
+import { runWorkflow } from "../workflow/handler";
 
 /**
  * Updates DynamoDB Schedule state after a successful run
@@ -76,7 +78,10 @@ export default async (event: ScheduleRuleInput): Promise<void> => {
     // Run Operation
     logger.info("Running schedule", schedule);
     try {
-      if (schedule.operation === "sort") {
+      if (schedule.operation === "workflow") {
+        const workflowSchedule = schedule as WorkflowScheduleItem;
+        await runWorkflow(workflowSchedule.operationParameters);
+      } else if (schedule.operation === "sort") {
         const { playlistId, property, order } = schedule.operationParameters;
 
         if (!playlistId) {
