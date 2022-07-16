@@ -25,7 +25,7 @@ describe("generateCronTabFromTimestamp", () => {
   test("should create a weekly crontab from a timestamp", async () => {
     const now = new Date("2022-06-17T03:24:00");
     const cron = generateCronTabFromTimestamp("weekly", now);
-    const expectedCron = "cron(24 3 ? * 5 2022)";
+    const expectedCron = "cron(24 3 ? * 6 2022)";
     expect(cron).toEqual(expectedCron);
   });
 

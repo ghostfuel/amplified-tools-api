@@ -86,7 +86,7 @@ export function generateCronTabFromTimestamp(
     dayOfMonth = "*";
   } else if (cadence === "weekly") {
     dayOfMonth = "?";
-    dayOfWeek = `${timestamp.getDay()}`;
+    dayOfWeek = `${timestamp.getDay() + 1}`;
   } else if (cadence === "yearly") {
     month = `${timestamp.getMonth() + 1}`;
     year = "*";
