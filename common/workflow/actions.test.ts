@@ -63,7 +63,7 @@ describe("runSaveAction", () => {
     const saveAction: SaveAction = {
       operation: "action",
       type: "save",
-      params: { name: "New Test Playlist 1" },
+      params: { name: "New Test Playlist 1", description: "Test" },
       inputs: [],
       outputs: [],
       results: [],
@@ -78,7 +78,8 @@ describe("runSaveAction", () => {
     // Assert
     expect(getUserPlaylists).toHaveBeenCalledTimes(1);
     expect(createPlaylist).toHaveBeenCalledTimes(1);
-    expect(createPlaylist).toHaveBeenCalledWith(saveAction.params.name);
+    const { name, description, isPublic, isCollaborative } = saveAction.params;
+    expect(createPlaylist).toHaveBeenCalledWith(name, { description, isPublic, isCollaborative });
     expect(addTracksToPlaylist).toHaveBeenCalledTimes(0);
     expect(reorderTracksInPlaylist).toHaveBeenCalledTimes(0);
     expect(replaceTracksInPlaylist).toHaveBeenCalledTimes(1);

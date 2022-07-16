@@ -42,7 +42,13 @@ export async function runSaveAction(
 
   // If we have no ID, make a new playlist with the supplied name
   if (!id && name) {
-    const newPlaylist = await spotifyApi.createPlaylist(name);
+    const { description, isPublic, isCollaborative } = params;
+    // TODO: Public and Profile visibility has changed, may need another call here to not show the playlist on a profile vs. public/private
+    const newPlaylist = await spotifyApi.createPlaylist(name, {
+      description,
+      public: isPublic,
+      collaborative: isCollaborative,
+    });
     id = newPlaylist.body.id;
   }
 

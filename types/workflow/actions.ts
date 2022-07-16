@@ -3,9 +3,11 @@ import { Operation } from "./index";
 export type Action<T, P> = Operation<"action", T, P>;
 
 export interface SaveActionParams {
+  uri?: string;
   name?: string;
   description?: string;
-  uri?: string;
+  isPublic?: boolean;
+  isCollaborative?: boolean;
   append?: boolean;
   reorder?: boolean;
 }
