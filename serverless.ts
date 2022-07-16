@@ -5,6 +5,7 @@ import { login, callback } from "./resources/functions/login";
 import { sort } from "./resources/functions/sort";
 import { createSchedule, getSchedule, getSchedules, deleteSchedule, updateSchedule } from "./resources/functions/schedules";
 import { scheduleRunner } from "./resources/functions/schedule-runner";
+import { runWorkflow } from "./resources/functions/workflow";
 import cognito from "./resources/cognito";
 import apiGateway from "./resources/api-gateway";
 import dynamodb from "./resources/dynamodb";
@@ -70,6 +71,7 @@ const serverlessConfiguration: AWS = {
     deleteSchedule,
     updateSchedule,
     scheduleRunner,
+    runWorkflow,
   },
   resources: {
     Resources: {
