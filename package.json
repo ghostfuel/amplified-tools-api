@@ -1,9 +1,12 @@
 {
   "name": "amplified-tools-api",
   "version": "0.0.0",
+  "private": true,
   "description": "A TypeScript Serverless Framework",
-  "author": "",
-  "license": "MIT",
+  "author": {
+    "name": "Mitchell",
+    "url": "https://github.com/ghostfuel"
+  },
   "main": "handler.js",
   "scripts": {
     "audit": "npx better-npm-audit audit",

@@ -10,10 +10,6 @@ import runFilterOperation from "@common/workflow/filters";
 import runActionOperation from "@common/workflow/actions";
 
 export async function runWorkflow(workflow: Workflow) {
-  if (workflow.spotifyTokens?.access_token) {
-    spotify.setAccessToken(workflow.spotifyTokens?.access_token);
-  }
-
   const { operations } = workflow;
   for (const operation of operations) {
     logger.info(`Running ${operation.operation} operation`, {
@@ -71,6 +67,12 @@ export default async function (event: APIGatewayProxyEvent): Promise<APIGatewayP
 
   try {
     const workflow = JSON.parse(event.body) as Workflow;
+
+    if (!workflow.spotifyTokens?.access_token) {
+      return lambdaResponse(400, "Missing spotify access token");
+    }
+
+    spotify.setAccessToken(workflow.spotifyTokens?.access_token);
     await runWorkflow(workflow);
 
     logger.info("Successfully completed workflow");
