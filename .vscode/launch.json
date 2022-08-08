@@ -17,18 +17,23 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Serverless Offline",
-      "program": "${workspaceRoot}/node_modules/serverless/bin/serverless",
-      "args": ["offline", "--noTimeout", "--stage=dev"],
-      "sourceMaps": true,
-      "runtimeArgs": ["--lazy"],
-      "outFiles": ["${workspaceFolder}/.webpack/**/*.js"],
+      "name": "Debug Serverless Offline",
       "runtimeExecutable": "node",
-      "env": {},
+      "runtimeArgs": ["--lazy"],
+      "skipFiles": ["<node_internals>/**"],
+      "args": ["offline", "start", "--noAuth"],
+      "program": "${workspaceRoot}/node_modules/.bin/serverless",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "smartStep": false,
+      "stopOnEntry": false,
+      "outFiles": ["${workspaceFolder}/.webpack/**/*"],
+      "env": {
+        "IS_OFFLINE": "true",
+        "NODE_ENV": "development"
+      },
       "envFile": "${workspaceFolder}/.env",
-      "windows": {
-        "program": "${workspaceRoot}\\node_modules\\serverless\\bin\\serverless"
-      }
+      "autoAttachChildProcesses": true
     }
   ]
 }
