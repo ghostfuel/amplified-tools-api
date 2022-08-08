@@ -1,10 +1,14 @@
 # Amplified.tools API
 
-This Serverless Framwork repository is for a homebrew project, [amplified.tools](https://www.amplified.tools), to provide more powerful, automated ways of interacting with your Spotify playlists.
+This Serverless Framework repository is for a homebrew project, [amplified.tools](https://www.amplified.tools), to provide more powerful, automated ways of interacting with your Spotify playlists.
 
 ![Amplified.tools AWS Architecture diagram](./documentation/amplified.tools-architecture.png)
 
 ## Development
+
+
+### Pre-requisites
+1. [Setup AWS CLI and profile](https://www.serverless.com/framework/docs/providers/aws/guide/credentials) 
 
 ### Setup
 
@@ -13,7 +17,7 @@ This Serverless Framwork repository is for a homebrew project, [amplified.tools]
         - SPOTIFY_CLIENT_ID
         - SPOTIFY_CLIENT_SECRET
 
-Run `npm run offline` to launch the serverless offline at [http://localhost:3000](http://localhost:3000)
+Run `npm start` to launch the serverless offline at [http://localhost:3000](http://localhost:3000)
 
 ## Deployment
 
