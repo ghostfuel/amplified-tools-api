@@ -29,9 +29,7 @@ export const createSchedule: LambdaFunctionCustomIAM = {
     },
   ],
   environment: {
-    // SCHEDULE_RUNNER_ARN: { "Fn::GetAtt": ["ScheduleRunnerLambdaFunction", "Arn"] },
     SCHEDULE_RUNNER_ARN:
-      // eslint-disable-next-line max-len
       "arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-schedule-runner",
   },
   iamRoleStatementsName: "${self:service}-${self:provider.stage}-create-schedule-role",
@@ -39,7 +37,6 @@ export const createSchedule: LambdaFunctionCustomIAM = {
     {
       Effect: "Allow",
       Action: ["events:PutRule", "events:PutTargets"],
-      // TODO: This potentially isnt the right place? :rule/*?
       Resource: "arn:aws:events:${self:provider.region}:${aws:accountId}:event-bus/default",
     },
     {
