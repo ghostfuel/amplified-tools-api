@@ -38,7 +38,7 @@ export const sort = async (
   // Sort according to supplied property (artist or lowercase any string property) and order
   const sorted = property.includes("artist")
     ? sortPlaylistTracksByArtists(items)
-    : orderBy(items, [(item) => get(item, property).toLowerCase()]);
+    : orderBy(items, [(item) => get(item, property)?.toLowerCase()]);
   if (order === "desc") sorted.reverse();
 
   // Check if already sorted...

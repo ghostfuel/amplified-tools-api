@@ -28,7 +28,7 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: "aws",
     deploymentMethod: "direct",
-    runtime: "nodejs16.x",
+    runtime: "nodejs20.x",
     stage: "${opt:stage, 'dev'}",
     region: "eu-west-2",
     versionFunctions: false,
